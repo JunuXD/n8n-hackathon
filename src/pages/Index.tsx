@@ -39,15 +39,18 @@ const Index = () => {
 
     try {
       // Send POST request to n8n webhook with JSON body
-      const response = await fetch("https://your-n8n-webhook-url.com", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userMessage.content,
-        }),
-      });
+      const response = await fetch(
+        "https://primary-production-b57a.up.railway.app/webhook-test/chatbot",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: userMessage.content,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to get response from webhook");
@@ -55,18 +58,23 @@ const Index = () => {
 
       const data = await response.json();
       console.log("n8n response:", data);
-      
+
       // Handle various possible response formats from n8n
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.answer || data.response || data.message || data.output || JSON.stringify(data),
+        content:
+          data.answer ||
+          data.response ||
+          data.message ||
+          data.output[0] ||
+          JSON.stringify(data),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
-      
+
       // Add error message to chat
       const errorMessage: Message = {
         role: "assistant",
@@ -94,7 +102,8 @@ const Index = () => {
               Welcome to Our Bakery
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Ask me about our fresh bread, opening hours, or get personalized recommendations
+              Ask me about our fresh bread, opening hours, or get personalized
+              recommendations
             </p>
           </div>
 
@@ -110,19 +119,25 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8">
             <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
-              <h3 className="font-semibold text-foreground mb-2">Fresh Daily</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                Fresh Daily
+              </h3>
               <p className="text-sm text-muted-foreground">
                 All our bread is baked fresh every morning
               </p>
             </div>
             <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
-              <h3 className="font-semibold text-foreground mb-2">AI Assistant</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                AI Assistant
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Get instant answers about availability and recommendations
               </p>
             </div>
             <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
-              <h3 className="font-semibold text-foreground mb-2">Quick Service</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                Quick Service
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Fast responses to help you plan your visit
               </p>
@@ -139,8 +154,12 @@ const Index = () => {
       <header className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4 shadow-soft">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">Bakery Assistant</h1>
-            <p className="text-sm text-muted-foreground">Here to help with your questions</p>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">
+              Bakery Assistant
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Here to help with your questions
+            </p>
           </div>
           <Button
             variant="ghost"
@@ -167,7 +186,11 @@ const Index = () => {
             </div>
           )}
           {messages.map((message, index) => (
-            <ChatMessage key={index} role={message.role} content={message.content} />
+            <ChatMessage
+              key={index}
+              role={message.role}
+              content={message.content}
+            />
           ))}
           {isLoading && (
             <div className="flex justify-start mb-4">

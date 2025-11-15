@@ -54,11 +54,12 @@ const Index = () => {
       }
 
       const data = await response.json();
+      console.log("n8n response:", data);
       
-      // Assuming the webhook returns an object with an 'answer' field
+      // Handle various possible response formats from n8n
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.answer || data.response || "I received your message!",
+        content: data.answer || data.response || data.message || data.output || JSON.stringify(data),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);

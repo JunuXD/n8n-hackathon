@@ -57,7 +57,6 @@ const Index = () => {
       }
 
       const data = await response.json();
-      console.log("n8n response:", data);
 
       // Handle various possible response formats from n8n
       const assistantMessage: Message = {
@@ -99,11 +98,12 @@ const Index = () => {
         <div className="max-w-2xl w-full text-center space-y-8 animate-fade-in">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground tracking-tight">
-              Welcome to Our Bakery
+              안녕하세요. <br />
+              빵빵 베이커리 입니다.
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Ask me about our fresh bread, opening hours, or get personalized
-              recommendations
+              맛있는 빵의 재고 정보와 가게 정보, 저희의 추천 상품을
+              안내드립니다.
             </p>
           </div>
 
@@ -113,33 +113,31 @@ const Index = () => {
               size="lg"
               className="rounded-full px-8 py-6 text-lg font-medium shadow-warm hover:scale-105 transition-all duration-300"
             >
-              Start Chat
+              채팅 시작
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8">
             <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
               <h3 className="font-semibold text-foreground mb-2">
-                Fresh Daily
+                매일 굽는 신선한 빵
               </h3>
               <p className="text-sm text-muted-foreground">
-                All our bread is baked fresh every morning
+                매일 아침에 구워 <br /> 더 맛있는 빵
+              </p>
+            </div>
+            <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
+              <h3 className="font-semibold text-foreground mb-2">AI 챗봇</h3>
+              <p className="text-sm text-muted-foreground">
+                방문 전에 재고를 확인하세요
               </p>
             </div>
             <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
               <h3 className="font-semibold text-foreground mb-2">
-                AI Assistant
+                실시간 정보
               </h3>
               <p className="text-sm text-muted-foreground">
-                Get instant answers about availability and recommendations
-              </p>
-            </div>
-            <div className="p-6 bg-card rounded-2xl shadow-soft border border-border hover:shadow-warm transition-all duration-300">
-              <h3 className="font-semibold text-foreground mb-2">
-                Quick Service
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Fast responses to help you plan your visit
+                실시간 가게 정보가 내손안에
               </p>
             </div>
           </div>
@@ -155,10 +153,10 @@ const Index = () => {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              Bakery Assistant
+              빵집 챗봇
             </h1>
             <p className="text-sm text-muted-foreground">
-              Here to help with your questions
+              질문에 바로 응답해드립니다.
             </p>
           </div>
           <Button
@@ -167,7 +165,7 @@ const Index = () => {
             onClick={() => setShowChat(false)}
             className="text-muted-foreground hover:text-foreground"
           >
-            Back to Home
+            메인으로
           </Button>
         </div>
       </header>
@@ -178,10 +176,10 @@ const Index = () => {
           {messages.length === 0 && (
             <div className="text-center py-12 animate-fade-in">
               <p className="text-muted-foreground text-lg">
-                Ask me anything about our bakery!
+                저희 빵집에 대해 아무거나 질문해주세요!
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Try: "Is a baguette available? When do you close?"
+                "딸기 케이크 있나요? 몇시에 영업 마감하나요?" 라고 쳐보세요!
               </p>
             </div>
           )}
@@ -210,7 +208,7 @@ const Index = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about bread availability, hours, or get recommendations..."
+            placeholder="빵의 재고, 영업 시간, 혹은 메뉴 추천에 관한 질문에 답해드립니다."
             disabled={isLoading}
             className="flex-1 rounded-2xl bg-background border-border focus-visible:ring-primary text-base py-6 px-5 resize-none"
           />
@@ -224,7 +222,7 @@ const Index = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center mt-3 max-w-4xl mx-auto">
-          Powered by AI • Responses may vary
+          AI 응답입니다. • 동일한 질문에 동일한 답변을 주지 않을 수 있습니다.
         </p>
       </div>
     </div>

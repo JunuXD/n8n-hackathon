@@ -40,7 +40,7 @@ const Index = () => {
     try {
       // Send POST request to n8n webhook with JSON body
       const response = await fetch(
-        "https://primary-production-b57a.up.railway.app/webhook-test/chatbot",
+        "https://primary-production-b57a.up.railway.app/webhook/chatbot",
         {
           method: "POST",
           headers: {
@@ -65,9 +65,9 @@ const Index = () => {
         content:
           data.answer ||
           data.response ||
-          data.message ||
-          data.output[0] ||
-          JSON.stringify(data),
+          data.output.answer ||
+          data.output ||
+          "Failed to find proper answer in Object",
       };
 
       setMessages((prev) => [...prev, assistantMessage]);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogTrigger,
@@ -32,7 +33,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   createMenu,
@@ -49,36 +54,22 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { postOcrMenuImage } from "@/lib/apis/ocr";
-import { Toast } from "@/components/ui/toast"; // Toast 컴포넌트 임포트
 import { toast } from "@/hooks/use-toast";
-
-const mockShop = {
-  name: "Seoyeon's Bakery",
-  owner: "Seoyeon Kim",
-  status: "Open",
-  avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  description: "Fresh bread and pastries every day!",
-};
-
-const mockStats = [
-  { label: "Today's Sales", value: "₩120,000" },
-  { label: "Orders", value: 34 },
-  { label: "Inventory Items", value: 12 },
-  { label: "Pending Orders", value: 3 },
-];
-
-const mockInventory = [
-  { name: "Baguette", stock: 8, status: "Low" },
-  { name: "Croissant", stock: 20, status: "Good" },
-  { name: "Sourdough", stock: 5, status: "Low" },
-  { name: "Muffin", stock: 15, status: "Good" },
-];
+import { fetchOrderStats } from "@/lib/apis/orders";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function ManagerPage() {
+  const navigate = useNavigate();
   const [store, setStore] = useState<Store | null>(null);
   const [menuList, setMenuList] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderStats, setOrderStats] = useState({
+    total_sales: 0,
+    order_count: 0,
+    inventory_count: 0,
+  });
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [newMenu, setNewMenu] = useState<Partial<Menu>>({
     id: 0,
     name: "",
@@ -95,17 +86,28 @@ export default function ManagerPage() {
 
   async function getMenuList() {
     try {
-      const menuData = await fetchMenuByStoreId("1"); // Replace "1" with dynamic storeId if needed
+      const menuData = await fetchMenuByStoreId("1");
       setMenuList(menuData);
+      return menuData.length;
     } catch (err) {
       setError(err);
+      return 0;
+    }
+  }
+
+  async function getOrderStats() {
+    try {
+      const stats = await fetchOrderStats("1");
+      setOrderStats(stats);
+    } catch (err) {
+      console.error("Error fetching order stats:", err);
     }
   }
 
   useEffect(() => {
     async function getStoreDetails() {
       try {
-        const storeData = await fetchStoreDetails("1"); // Replace "1" with dynamic storeId if needed
+        const storeData = await fetchStoreDetails("1");
         setStore(storeData);
       } catch (err) {
         setError(err);
@@ -116,6 +118,7 @@ export default function ManagerPage() {
 
     getStoreDetails();
     getMenuList();
+    getOrderStats();
   }, []);
 
   const handleCreateMenu = async () => {
@@ -254,7 +257,7 @@ export default function ManagerPage() {
           <Avatar>
             <AvatarImage />
           </Avatar>
-          <div>
+          <div className="flex-1">
             <CardTitle>{store.name}</CardTitle>
             <CardDescription>
               {store.description || "No description available."}
@@ -262,52 +265,71 @@ export default function ManagerPage() {
             <Badge
               className="mt-2"
               variant={"Open" === "Open" ? "default" : "destructive"}
-            ></Badge>
+            >
+              Open
+            </Badge>
           </div>
         </CardHeader>
+        <CardContent>
+          <Button
+            onClick={() => navigate("/orders")}
+            className="w-full"
+            size="lg"
+          >
+            주문 내역 보기
+          </Button>
+        </CardContent>
       </Card>
 
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-        {mockStats.map((stat) => (
-          <Card key={stat.label} className="text-center">
-            <CardHeader>
-              <CardDescription>{stat.label}</CardDescription>
-              <CardTitle>{stat.value}</CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <Card className="text-center">
+          <CardHeader>
+            <CardDescription>오늘의 매출</CardDescription>
+            <CardTitle>₩{orderStats.total_sales.toLocaleString()}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="text-center">
+          <CardHeader>
+            <CardDescription>주문 수</CardDescription>
+            <CardTitle>{orderStats.order_count}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card className="text-center">
+          <CardHeader>
+            <CardDescription>메뉴 항목</CardDescription>
+            <CardTitle>{menuList.length}</CardTitle>
+          </CardHeader>
+        </Card>
       </div>
 
       {/* Inventory Table */}
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
-          <CardTitle>Inventory Status</CardTitle>
-          <CardDescription>
-            Check your current stock and status.
-          </CardDescription>
+          <CardTitle>재고 현황</CardTitle>
+          <CardDescription>현재 메뉴별 재고를 확인하세요.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>메뉴</TableHead>
+                <TableHead>재고</TableHead>
+                <TableHead>상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockInventory.map((item) => (
-                <TableRow key={item.name}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.stock}</TableCell>
+              {menuList.map((menu) => (
+                <TableRow key={menu.id}>
+                  <TableCell>{menu.name}</TableCell>
+                  <TableCell>{menu.current_stock}개</TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        item.status === "Low" ? "destructive" : "default"
+                        menu.current_stock <= 5 ? "destructive" : "default"
                       }
                     >
-                      {item.status}
+                      {menu.current_stock <= 5 ? "부족" : "충분"}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -317,12 +339,32 @@ export default function ManagerPage() {
         </CardContent>
       </Card>
 
-      {/* Menu Listing */}
+      {/* Menu Listing - Collapsible */}
       <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex justify-between items-start">
-            Menu
-            <Popover>
+        <Collapsible open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <CardHeader>
+            <CollapsibleTrigger asChild>
+              <div className="flex justify-between items-center cursor-pointer">
+                <div>
+                  <CardTitle>메뉴 관리</CardTitle>
+                  <CardDescription>
+                    매장에서 판매 중인 메뉴 목록입니다.
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" size="icon">
+                  {isMenuOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="flex justify-end mb-4">
+                <Popover>
               <PopoverTrigger asChild>
                 <Button variant="default">메뉴 추가하기</Button>
               </PopoverTrigger>
@@ -408,16 +450,10 @@ export default function ManagerPage() {
                     </DialogContent>
                   </Dialog>
                 </Dialog>
-              </PopoverContent>
-            </Popover>
-          </CardTitle>
-
-          <CardDescription>
-            List of available items in the store.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Item</TableHead>
@@ -458,9 +494,11 @@ export default function ManagerPage() {
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       {/* 삭제 다이얼로그 */}
@@ -542,11 +580,6 @@ export default function ManagerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Quick Actions */}
-      <div className="flex flex-1 items-center justify-center gap-4">
-        <Button variant="secondary">View Orders</Button>
-        <Button variant="outline">Settings</Button>
-      </div>
     </div>
   );
 }

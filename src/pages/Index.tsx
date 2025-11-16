@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -11,6 +12,7 @@ interface Message {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +116,15 @@ const Index = () => {
               className="rounded-full px-8 py-6 text-lg font-medium shadow-warm hover:scale-105 transition-all duration-300"
             >
               채팅 시작
+            </Button>
+            <Button
+              onClick={() => navigate("/order")}
+              size="lg"
+              variant="outline"
+              className="rounded-full px-8 py-6 text-lg font-medium shadow-warm hover:scale-105 transition-all duration-300"
+            >
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              주문하기
             </Button>
           </div>
 

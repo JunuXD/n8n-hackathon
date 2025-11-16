@@ -56,7 +56,9 @@ export default function OrderPage() {
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1) {
+    if (selectedMenu && newQuantity >= 1 && newQuantity <= selectedMenu.current_stock) {
+      setQuantity(newQuantity);
+    } else if (!selectedMenu && newQuantity >= 1) {
       setQuantity(newQuantity);
     }
   };
@@ -212,19 +214,26 @@ export default function OrderPage() {
                     value={quantity}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
-                      if (val >= 1) setQuantity(val);
+                      if (val >= 1 && val <= selectedMenu.current_stock) {
+                        setQuantity(val);
+                      }
                     }}
                     className="text-center w-20"
                     min="1"
+                    max={selectedMenu.current_stock}
                   />
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() => handleQuantityChange(1)}
+                    disabled={quantity >= selectedMenu.current_stock}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  재고: {selectedMenu.current_stock}개
+                </p>
               </div>
 
               <div className="pt-4 border-t border-border">

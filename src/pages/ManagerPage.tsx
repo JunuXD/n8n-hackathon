@@ -34,7 +34,14 @@ import {
 } from "@/components/ui/select";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { createMenu, fetchStoreDetails, Menu, Store } from "@/lib/apis/stores";
+import {
+  createMenu,
+  deleteMenu,
+  fetchStoreDetails,
+  Menu,
+  Store,
+  updateMenu,
+} from "@/lib/apis/stores";
 import { fetchMenuByStoreId } from "@/lib/apis/stores";
 import {
   Popover,
@@ -82,7 +89,9 @@ export default function ManagerPage() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // 파일 상태 추가
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [message, setMessage] = useState<string>("");
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null); // 선택된 메뉴 상태
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // 삭제 다이얼로그 상태
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // 수정 다이얼로그 상태
 
   async function getMenuList() {
     try {
@@ -175,6 +184,57 @@ export default function ManagerPage() {
       });
     } finally {
       setButtonLoading(false);
+    }
+  };
+
+  const handleDeleteMenu = async () => {
+    if (!selectedMenu) return;
+
+    try {
+      await deleteMenu(selectedMenu.id); // 메뉴 삭제 API 호출
+      toast({
+        title: "삭제 완료",
+        description: `${selectedMenu.name}이(가) 삭제되었습니다.`,
+        variant: "default",
+      });
+      await getMenuList(); // 메뉴 목록 갱신
+    } catch (err) {
+      console.error("Error deleting menu:", err);
+      toast({
+        title: "Error",
+        description: "메뉴 삭제에 실패했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false); // 다이얼로그 닫기
+    }
+  };
+
+  // 메뉴 수정 핸들러
+  const handleEditMenu = async () => {
+    if (!selectedMenu) return;
+
+    try {
+      await updateMenu(selectedMenu.id, {
+        name: selectedMenu.name,
+        price: selectedMenu.price,
+        status: selectedMenu.status,
+      }); // 메뉴 수정 API 호출
+      toast({
+        title: "수정 완료",
+        description: `${selectedMenu.name}이(가) 수정되었습니다.`,
+        variant: "default",
+      });
+      await getMenuList(); // 메뉴 목록 갱신
+    } catch (err) {
+      console.error("Error updating menu:", err);
+      toast({
+        title: "Error",
+        description: "메뉴 수정에 실패했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditDialogOpen(false); // 다이얼로그 닫기
     }
   };
 
@@ -363,6 +423,7 @@ export default function ManagerPage() {
                 <TableHead>Item</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -371,12 +432,115 @@ export default function ManagerPage() {
                   <TableCell>{menu.name}</TableCell>
                   <TableCell>₩{menu.price}</TableCell>
                   <TableCell>{menu.description || "No description"}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {/* 수정 버튼 */}
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedMenu(menu);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        수정
+                      </Button>
+                      {/* 삭제 버튼 */}
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setSelectedMenu(menu);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        삭제
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* 삭제 다이얼로그 */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>메뉴 삭제</DialogTitle>
+            <DialogDescription>
+              {selectedMenu?.name}을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수
+              없습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              취소
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteMenu}>
+              삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 수정 다이얼로그 */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>메뉴 수정</DialogTitle>
+            <DialogDescription>메뉴 정보를 수정하세요.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Menu Name"
+              value={selectedMenu?.name || ""}
+              onChange={(e) =>
+                setSelectedMenu(
+                  (prev) => prev && { ...prev, name: e.target.value }
+                )
+              }
+            />
+            <Input
+              placeholder="Price"
+              type="number"
+              value={selectedMenu?.price || ""}
+              onChange={(e) =>
+                setSelectedMenu(
+                  (prev) => prev && { ...prev, price: Number(e.target.value) }
+                )
+              }
+            />
+            <Select
+              value={selectedMenu?.status || "판매중"}
+              onValueChange={(value) =>
+                setSelectedMenu(
+                  (prev) =>
+                    prev && { ...prev, status: value as "판매중" | "품절" }
+                )
+              }
+            >
+              <SelectTrigger>{selectedMenu?.status || "판매중"}</SelectTrigger>
+              <SelectContent>
+                <SelectItem value="판매중">판매중</SelectItem>
+                <SelectItem value="품절">품절</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              취소
+            </Button>
+            <Button onClick={handleEditMenu}>수정</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Quick Actions */}
       <div className="flex flex-1 items-center justify-center gap-4">

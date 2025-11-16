@@ -25,7 +25,7 @@ export interface Menu {
 export async function fetchStoreDetails(storeId: string): Promise<Store> {
   try {
     const response = await axios.get(
-      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/19874092-7893-4f2b-89e4-3a8bcfff5692/stores/${storeId}`
+      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}`
     );
     return response.data;
   } catch (error) {
@@ -37,7 +37,7 @@ export async function fetchStoreDetails(storeId: string): Promise<Store> {
 export async function fetchMenuByStoreId(storeId: string): Promise<Menu[]> {
   try {
     const response = await axios.get(
-      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/19874092-7893-4f2b-89e4-3a8bcfff5692/stores/${storeId}/menus`
+      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}/menus`
     );
     return response.data;
   } catch (error) {
@@ -49,7 +49,7 @@ export async function fetchMenuByStoreId(storeId: string): Promise<Menu[]> {
 export async function createMenu(data: Partial<Menu>): Promise<Menu> {
   try {
     const response = await axios.post(
-      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/19874092-7893-4f2b-89e4-3a8bcfff5692/stores/${data.store_id}/menus`,
+      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${data.store_id}/menus`,
       data
     );
     return response.data;
@@ -65,7 +65,7 @@ export async function updateMenu(
 ): Promise<Menu> {
   try {
     const response = await axios.put(
-      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/19874092-7893-4f2b-89e4-3a8bcfff5692/menus/${menuId}`,
+      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/menus/${menuId}`,
       data
     );
     return response.data;
@@ -78,7 +78,7 @@ export async function updateMenu(
 export async function deleteMenu(menuId: number): Promise<void> {
   try {
     await axios.delete(
-      `https://primary-production-b57a.up.railway.app/webhook-test/19874092-7893-4f2b-89e4-3a8bcfff5692/19874092-7893-4f2b-89e4-3a8bcfff5692/menus/${menuId}`
+      `https://primary-production-b57a.up.railway.app/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/menus/${menuId}`
     );
   } catch (error) {
     console.error("Error deleting menu:", error);

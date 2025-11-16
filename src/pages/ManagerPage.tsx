@@ -47,7 +47,7 @@ import {
   Store,
   updateMenu,
 } from "@/lib/apis/stores";
-import { fetchMenuByStoreId } from "@/lib/apis/stores";
+import { fetchMenuByStoreId, toggleStoreState } from "@/lib/apis/stores";
 import {
   Popover,
   PopoverContent,
@@ -266,7 +266,15 @@ export default function ManagerPage() {
               className="mt-2"
               variant={"Open" === "Open" ? "default" : "destructive"}
             >
-              Open
+              {store.cur_state === true ? "Open" : "Closed"}
+            </Badge>
+            <Badge
+              onClick={() =>
+                toggleStoreState(store.id.toString(), store.cur_state)
+              }
+              className="ml-4"
+            >
+              가게 상태 변경
             </Badge>
           </div>
         </CardHeader>
@@ -365,139 +373,141 @@ export default function ManagerPage() {
             <CardContent>
               <div className="flex justify-end mb-4">
                 <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="default">메뉴 추가하기</Button>
-              </PopoverTrigger>
-              <PopoverContent className="flex flex-col gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="default">직접 추가하기</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>새 메뉴 추가</DialogTitle>
-                      <DialogDescription>
-                        메뉴 이름, 가격, 상태를 입력하세요.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-4">
-                      <Input
-                        placeholder="Menu Name"
-                        value={newMenu.name}
-                        onChange={(e) =>
-                          setNewMenu({ ...newMenu, name: e.target.value })
-                        }
-                      />
-                      <Input
-                        placeholder="Price"
-                        type="number"
-                        value={newMenu.price}
-                        onChange={(e) =>
-                          setNewMenu({
-                            ...newMenu,
-                            price: Number(e.target.value),
-                          })
-                        }
-                      />
-                      <Select
-                        value={newMenu.status || "판매중"}
-                        onValueChange={(value) => {
-                          setNewMenu({
-                            ...newMenu,
-                            status: value as "판매중" | "품절",
-                          });
-                          console.log("New Menu State:", value);
-                        }}
-                      >
-                        <SelectTrigger>
-                          {newMenu.status || "판매중"}
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="판매중">판매중</SelectItem>
-                          <SelectItem value="품절">품절</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <DialogFooter>
-                      <Button onClick={handleCreateMenu}>추가하기</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="default">이미지로 추가하기</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>이미지 업로드</DialogTitle>
-                        <DialogDescription>
-                          메뉴 이미지를 업로드하세요.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex flex-col gap-4">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange} // 파일 선택 핸들러
-                        />
-                        <Button
-                          onClick={handleFileUpload}
-                          disabled={buttonLoading}
-                        >
-                          {buttonLoading ? "업로드 중..." : "이미지 업로드"}
-                        </Button>{" "}
-                        {/* 업로드 버튼 */}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </Dialog>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {menuList.map((menu) => (
-                <TableRow key={menu.id}>
-                  <TableCell>{menu.name}</TableCell>
-                  <TableCell>₩{menu.price}</TableCell>
-                  <TableCell>{menu.description || "No description"}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {/* 수정 버튼 */}
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedMenu(menu);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        수정
-                      </Button>
-                      {/* 삭제 버튼 */}
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          setSelectedMenu(menu);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        삭제
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </CollapsibleContent>
+                  <PopoverTrigger asChild>
+                    <Button variant="default">메뉴 추가하기</Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="flex flex-col gap-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="default">직접 추가하기</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>새 메뉴 추가</DialogTitle>
+                          <DialogDescription>
+                            메뉴 이름, 가격, 상태를 입력하세요.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-4">
+                          <Input
+                            placeholder="Menu Name"
+                            value={newMenu.name}
+                            onChange={(e) =>
+                              setNewMenu({ ...newMenu, name: e.target.value })
+                            }
+                          />
+                          <Input
+                            placeholder="Price"
+                            type="number"
+                            value={newMenu.price}
+                            onChange={(e) =>
+                              setNewMenu({
+                                ...newMenu,
+                                price: Number(e.target.value),
+                              })
+                            }
+                          />
+                          <Select
+                            value={newMenu.status || "판매중"}
+                            onValueChange={(value) => {
+                              setNewMenu({
+                                ...newMenu,
+                                status: value as "판매중" | "품절",
+                              });
+                              console.log("New Menu State:", value);
+                            }}
+                          >
+                            <SelectTrigger>
+                              {newMenu.status || "판매중"}
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="판매중">판매중</SelectItem>
+                              <SelectItem value="품절">품절</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleCreateMenu}>추가하기</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="default">이미지로 추가하기</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>이미지 업로드</DialogTitle>
+                            <DialogDescription>
+                              메뉴 이미지를 업로드하세요.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex flex-col gap-4">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileChange} // 파일 선택 핸들러
+                            />
+                            <Button
+                              onClick={handleFileUpload}
+                              disabled={buttonLoading}
+                            >
+                              {buttonLoading ? "업로드 중..." : "이미지 업로드"}
+                            </Button>{" "}
+                            {/* 업로드 버튼 */}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </Dialog>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Item</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {menuList.map((menu) => (
+                    <TableRow key={menu.id}>
+                      <TableCell>{menu.name}</TableCell>
+                      <TableCell>₩{menu.price}</TableCell>
+                      <TableCell>
+                        {menu.description || "No description"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {/* 수정 버튼 */}
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedMenu(menu);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            수정
+                          </Button>
+                          {/* 삭제 버튼 */}
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedMenu(menu);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </CollapsibleContent>
         </Collapsible>
       </Card>
 
@@ -579,7 +589,6 @@ export default function ManagerPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

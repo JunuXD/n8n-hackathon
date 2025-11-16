@@ -9,6 +9,7 @@ export interface Store {
   close_time: string;
   created_at: string;
   updated_at: string;
+  cur_state: boolean;
 }
 
 export interface Menu {
@@ -21,6 +22,22 @@ export interface Menu {
   current_stock: number;
   created_at: string;
   updated_at: string;
+}
+
+export async function toggleStoreState(
+  storeId: string,
+  curState: boolean
+): Promise<Store> {
+  try {
+    const response = await axios.put(
+      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}/status`,
+      { new_state: !curState }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling store state:", error);
+    throw error;
+  }
 }
 
 export async function fetchStoreDetails(storeId: string): Promise<Store> {

@@ -134,17 +134,18 @@ export default function OrderPage() {
                     <TableCell>
                       <Badge
                         variant={
-                          menu.status === "판매중" ? "default" : "secondary"
+                          menu.current_stock > 0 ? "default" : "secondary"
                         }
+                        className="h-9 px-4 flex items-center justify-center text-sm"
                       >
-                        {menu.status}
+                        {menu.current_stock > 0 ? "판매중" : "품절"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Button
                         size="sm"
                         onClick={() => handleOrderClick(menu)}
-                        disabled={menu.status === "품절"}
+                        disabled={menu.current_stock <= 0}
                         className="rounded-full"
                       >
                         주문하기
@@ -184,10 +185,10 @@ export default function OrderPage() {
                   </div>
                   <Badge
                     variant={
-                      selectedMenu.status === "판매중" ? "default" : "secondary"
+                      selectedMenu.current_stock > 0 ? "default" : "secondary"
                     }
                   >
-                    {selectedMenu.status}
+                    {selectedMenu.current_stock > 0 ? "판매중" : "품절"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground">

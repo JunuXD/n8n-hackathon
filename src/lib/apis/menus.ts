@@ -1,4 +1,16 @@
-import { Menu } from "./stores";
+// Menu type for menu table
+export interface Menu {
+  id: number;
+  store_id: number;
+  name: string;
+  photo?: string;
+  price: number;
+  current_stock: number;
+  status: "판매중" | "품절" | string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 import { supabase } from "./supabaseClient";
 
 // 메뉴 생성

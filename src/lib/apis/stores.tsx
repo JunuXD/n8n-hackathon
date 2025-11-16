@@ -18,6 +18,7 @@ export interface Menu {
   description: string | null;
   store_id: number;
   status: "판매중" | "품절";
+  current_stock: number;
   created_at: string;
   updated_at: string;
 }

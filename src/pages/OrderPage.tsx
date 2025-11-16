@@ -8,12 +8,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -172,13 +167,15 @@ export default function OrderPage() {
               수량을 선택하고 주문을 확인하세요
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedMenu && (
             <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-lg">{selectedMenu.name}</h3>
+                    <h3 className="font-semibold text-lg">
+                      {selectedMenu.name}
+                    </h3>
                     {selectedMenu.description && (
                       <p className="text-sm text-muted-foreground">
                         {selectedMenu.description}

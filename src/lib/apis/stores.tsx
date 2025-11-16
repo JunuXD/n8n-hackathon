@@ -1,4 +1,4 @@
-import axios from "axios";
+import { supabase } from "./supabaseClient";
 
 export interface Store {
   id: number;
@@ -12,94 +12,28 @@ export interface Store {
   cur_state: boolean;
 }
 
-export interface Menu {
-  id: number;
-  name: string;
-  price: number;
-  description: string | null;
-  store_id: number;
-  status: "판매중" | "품절";
-  current_stock: number;
-  created_at: string;
-  updated_at: string;
+// Fetch store details by id
+export async function fetchStoreDetails(storeId: string): Promise<Store> {
+  const { data, error } = await supabase
+    .from("stores")
+    .select("*")
+    .eq("id", storeId)
+    .single();
+  if (error) throw error;
+  return data;
 }
 
+// Toggle store open/close state
 export async function toggleStoreState(
   storeId: string,
   curState: boolean
 ): Promise<Store> {
-  try {
-    const response = await axios.put(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}/status`,
-      { new_state: !curState }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error toggling store state:", error);
-    throw error;
-  }
-}
-
-export async function fetchStoreDetails(storeId: string): Promise<Store> {
-  try {
-    const response = await axios.get(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching store details:", error);
-    throw error;
-  }
-}
-
-export async function fetchMenuByStoreId(storeId: string): Promise<Menu[]> {
-  try {
-    const response = await axios.get(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${storeId}/menus`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching store details:", error);
-    throw error;
-  }
-}
-
-export async function createMenu(data: Partial<Menu>): Promise<Menu> {
-  try {
-    const response = await axios.post(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/stores/${data.store_id}/menus`,
-      data
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching store details:", error);
-    throw error;
-  }
-}
-
-export async function updateMenu(
-  menuId: number,
-  data: Partial<Menu>
-): Promise<Menu> {
-  try {
-    const response = await axios.put(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/menus/${menuId}`,
-      data
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating menu:", error);
-    throw error;
-  }
-}
-
-export async function deleteMenu(menuId: number): Promise<void> {
-  try {
-    await axios.delete(
-      `http://localhost:5678/webhook/19874092-7893-4f2b-89e4-3a8bcfff5692/request/menus/${menuId}`
-    );
-  } catch (error) {
-    console.error("Error deleting menu:", error);
-    throw error;
-  }
+  const { data, error } = await supabase
+    .from("stores")
+    .update({ cur_state: !curState })
+    .eq("id", storeId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }

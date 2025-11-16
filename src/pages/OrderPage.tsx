@@ -20,7 +20,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetchMenuByStoreId, Menu } from "@/lib/apis/stores";
+
+import { fetchMenuByStoreId, Menu } from "@/lib/apis/menus";
+import { createOrderSupabase } from "@/lib/apis/createOrderSupabase";
 import { toast } from "sonner";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 
@@ -56,30 +58,53 @@ export default function OrderPage() {
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (selectedMenu && newQuantity >= 1 && newQuantity <= selectedMenu.current_stock) {
+    if (
+      selectedMenu &&
+      newQuantity >= 1 &&
+      newQuantity <= selectedMenu.current_stock
+    ) {
       setQuantity(newQuantity);
     } else if (!selectedMenu && newQuantity >= 1) {
       setQuantity(newQuantity);
     }
   };
 
-  const handleConfirmOrder = () => {
-    if (selectedMenu) {
+  const handleConfirmOrder = async () => {
+    if (!selectedMenu) return;
+    try {
+      await createOrderSupabase({
+        store_id: 1,
+        menu_id: selectedMenu.id,
+        quantity,
+      });
       toast.success(
-        `Order confirmed: ${quantity}x ${selectedMenu.name} - Total: ₩${(
+        `주문 완료: ${quantity}x ${selectedMenu.name} - 총액 ₩${(
           selectedMenu.price * quantity
         ).toLocaleString()}`
       );
+      // Refresh menu list to update stock/품절
+      const menuData = await fetchMenuByStoreId("1");
+      setMenuList(menuData);
       setIsOrderDialogOpen(false);
       setSelectedMenu(null);
       setQuantity(1);
+    } catch (err: any) {
+      toast.error(err.message || "주문 실패");
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary">
-        <p className="text-muted-foreground">Loading menu...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-secondary">
+        <div className="animate-spin rounded-full h-14 w-14 border-4 border-amber-300 border-t-transparent mb-4 flex items-center justify-center">
+          <span className="text-3xl">🍞</span>
+        </div>
+        <div className="text-amber-700 font-semibold text-lg mb-1">
+          메뉴 불러오는 중...
+        </div>
+        <div className="text-xs text-gray-400">
+          따끈따끈한 빵처럼, 곧 준비됩니다!
+        </div>
       </div>
     );
   }
@@ -147,7 +172,9 @@ export default function OrderPage() {
                       <Button
                         size="sm"
                         onClick={() => handleOrderClick(menu)}
-                        disabled={menu.current_stock <= 0}
+                        disabled={
+                          menu.current_stock <= 0 || menu.status !== "판매중"
+                        }
                         className="rounded-full"
                       >
                         주문하기
@@ -187,10 +214,18 @@ export default function OrderPage() {
                   </div>
                   <Badge
                     variant={
-                      selectedMenu.current_stock > 0 ? "default" : "secondary"
+                      selectedMenu.current_stock > 0 &&
+                      selectedMenu.status === "판매중"
+                        ? "default"
+                        : "secondary"
                     }
                   >
-                    {selectedMenu.current_stock > 0 ? "판매중" : "품절"}
+                    {selectedMenu.current_stock > 0 &&
+                    selectedMenu.status === "판매중"
+                      ? "판매중"
+                      : selectedMenu.current_stock <= 0
+                      ? "품절"
+                      : "판매중지"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground">

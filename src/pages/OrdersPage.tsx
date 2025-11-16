@@ -32,7 +32,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { fetchOrderRecords, OrderRecord } from "@/lib/apis/orders";
+import {
+  fetchOrderRecordsSupabase,
+  OrderRecord,
+} from "@/lib/apis/ordersSupabase";
 import { ArrowLeft } from "lucide-react";
 
 export default function OrdersPage() {
@@ -48,7 +51,11 @@ export default function OrdersPage() {
     async function getOrders() {
       try {
         setLoading(true);
-        const data = await fetchOrderRecords("1", currentPage, itemsPerPage);
+        const data = await fetchOrderRecordsSupabase(
+          1,
+          currentPage,
+          itemsPerPage
+        );
         setOrders(data.orders);
         setTotalOrders(data.total);
       } catch (err) {
@@ -57,7 +64,6 @@ export default function OrdersPage() {
         setLoading(false);
       }
     }
-
     getOrders();
   }, [currentPage, itemsPerPage]);
 
@@ -75,8 +81,12 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg">로딩 중...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-amber-300 border-t-transparent mb-4" />
+        <div className="text-amber-700 font-semibold text-lg mb-1">
+          주문 내역 불러오는 중...
+        </div>
+        <div className="text-xs text-gray-400">잠시만 기다려주세요!</div>
       </div>
     );
   }
@@ -84,7 +94,9 @@ export default function OrdersPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg text-destructive">에러: {error.message}</p>
+        <p className="text-lg text-destructive">
+          에러: {error.message || String(error)}
+        </p>
       </div>
     );
   }
@@ -151,8 +163,10 @@ export default function OrdersPage() {
                     <TableCell>#{order.id}</TableCell>
                     <TableCell>{order.menu_name}</TableCell>
                     <TableCell>{order.quantity}개</TableCell>
-                    <TableCell>₩{order.total_price.toLocaleString()}</TableCell>
-                    <TableCell>{formatDate(order.created_at)}</TableCell>
+                    <TableCell>
+                      ₩{Number(order.total_price).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{formatDate(order.order_time)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

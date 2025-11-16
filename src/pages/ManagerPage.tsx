@@ -83,7 +83,6 @@ export default function ManagerPage() {
     id: 0,
     name: "",
     price: 0,
-    description: null,
     store_id: 1,
     status: "판매중",
   });

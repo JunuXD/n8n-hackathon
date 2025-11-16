@@ -5,18 +5,19 @@ export interface Store {
   name: string;
   description: string | null;
   address: string;
-  open_time: string;
-  close_time: string;
-  created_at: string;
-  updated_at: string;
+  open_time: string; // TIME
+  close_time: string; // TIME
+  created_at: string; // TIMESTAMP
+  updated_at: string; // TIMESTAMP
 }
 
 export interface Menu {
   id: number;
-  name: string;
-  price: number;
-  description: string | null;
   store_id: number;
+  name: string;
+  photo?: string | null;
+  price: number;
+  current_stock: number;
   status: "판매중" | "품절";
   created_at: string;
   updated_at: string;

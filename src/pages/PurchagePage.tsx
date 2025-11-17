@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 import {
   fetchPurchaseOrders,
   fetchPurchaseOrderItems,
@@ -19,7 +35,10 @@ import {
   PurchaseOrder,
   PurchaseOrderItem,
 } from "@/lib/apis/purchaseOrders";
+
 import { supabase } from "@/lib/apis/supabaseClient";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const statusColor: Record<string, string> = {
   요청: "bg-blue-100 text-blue-700",
@@ -27,8 +46,40 @@ const statusColor: Record<string, string> = {
   완료: "bg-green-100 text-green-700",
   취소: "bg-gray-200 text-gray-500",
 };
+// 재료 선택 셀렉트박스 컴포넌트
+interface IngredientSelectProps {
+  ingredients: { id: number; name: string; unit: string }[];
+  value: number;
+  onChange: (id: number) => void;
+}
 
-export default function PurchagePage() {
+function IngredientSelect({
+  ingredients,
+  value,
+  onChange,
+}: IngredientSelectProps) {
+  return (
+    <Select
+      value={value ? String(value) : undefined}
+      onValueChange={(val) => onChange(Number(val))}
+    >
+      <SelectTrigger className="w-32 h-9 text-xs px-2">
+        <SelectValue placeholder="재료 선택" />
+      </SelectTrigger>
+      <SelectContent>
+        {ingredients.map((ing) => (
+          <SelectItem key={ing.id} value={String(ing.id)} className="text-xs">
+            {ing.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+const PurchagePage: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,6 +117,49 @@ export default function PurchagePage() {
     }
   };
 
+  // 발주 완료 처리 함수
+  const handleCompleteOrder = async (order: PurchaseOrder) => {
+    try {
+      // 1. 상태 변경
+      const { error: updateError } = await supabase
+        .from("purchase_orders")
+        .update({ status: "입고완료", received_at: new Date() })
+        .eq("id", order.id);
+      if (updateError) throw updateError;
+
+      const { data: items, error: itemsError } = await supabase
+        .from("purchase_order_items")
+        .select("ingredient_id, requested_qty, received_qty")
+        .eq("purchase_order_id", order.id);
+      if (itemsError) throw itemsError;
+
+      // 3. 각 재료의 재고 업데이트
+      for (const item of items) {
+        const { error: stockError } = await supabase.rpc(
+          "increment_ingredient_stock",
+          {
+            ingredient_id: item.ingredient_id,
+            qty: item.requested_qty,
+          }
+        );
+        if (stockError) throw stockError;
+      }
+
+      toast({
+        title: "발주 완료 처리",
+        description: `발주가 완료 처리되고 재고가 반영되었습니다.`,
+        variant: "default",
+      });
+      loadOrders();
+    } catch (err: any) {
+      toast({
+        title: "오류",
+        description: err?.message || "발주 완료 처리 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     loadOrders();
     // fetch ingredients for item select
@@ -93,9 +187,18 @@ export default function PurchagePage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate("/manager")}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <h1 className="text-2xl font-bold">발주 관리</h1>
+      </div>
+      <div className="p-4">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="default">새 발주 생성</Button>
@@ -149,25 +252,29 @@ export default function PurchagePage() {
         </Dialog>
       </div>
       <Card className="p-4 bg-white shadow">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-gray-700">
-              <th className="py-2">발주번호</th>
-              <th>공급업체</th>
-              <th>상태</th>
-              <th>요청일</th>
-              <th>예상도착</th>
-              <th>총액</th>
-              <th>비고</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-center py-3">발주번호</TableHead>
+              <TableHead className="text-center">공급업체</TableHead>
+              <TableHead className="text-center">상태</TableHead>
+              <TableHead className="text-center">요청일</TableHead>
+              <TableHead className="text-center">예상도착</TableHead>
+              <TableHead className="text-center">총액</TableHead>
+              <TableHead className="text-center">비고</TableHead>
+              <TableHead className="text-center"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {orders.map((order) => (
-              <tr key={order.id} className="border-b hover:bg-gray-50">
-                <td className="py-2 font-mono">{order.order_number}</td>
-                <td>{order.supplier_name}</td>
-                <td>
+              <TableRow key={order.id} className="hover:bg-amber-50">
+                <TableCell className="text-center font-mono py-2">
+                  {order.order_number}
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.supplier_name}
+                </TableCell>
+                <TableCell className="text-center">
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                       statusColor[order.status] || "bg-gray-100 text-gray-600"
@@ -175,12 +282,20 @@ export default function PurchagePage() {
                   >
                     {order.status}
                   </span>
-                </td>
-                <td>{order.requested_at?.slice(0, 10)}</td>
-                <td>{order.expected_arrival?.slice(0, 10) || "-"}</td>
-                <td>{order.total_cost?.toLocaleString()}원</td>
-                <td>{order.note || "-"}</td>
-                <td>
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.requested_at?.slice(0, 10)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.expected_arrival?.slice(0, 10) || "-"}
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.total_cost?.toLocaleString()}원
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.note || "-"}
+                </TableCell>
+                <TableCell className="text-center flex flex-row gap-1 justify-center">
                   <Button
                     size="sm"
                     variant="outline"
@@ -188,11 +303,20 @@ export default function PurchagePage() {
                   >
                     상세
                   </Button>
-                </td>
-              </tr>
+                  {order.status !== "완료" && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleCompleteOrder(order)}
+                    >
+                      완료
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </Card>
       {/* 발주 상세/아이템 다이얼로그 */}
       <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
@@ -204,135 +328,154 @@ export default function PurchagePage() {
             </div>
           </DialogHeader>
           <div className="mb-2">
-            <table className="w-full text-xs mb-2">
-              <thead>
-                <tr className="border-b">
-                  <th>재료명</th>
-                  <th>단위</th>
-                  <th>요청수량</th>
-                  <th>입고수량</th>
-                  <th>단가</th>
-                  <th>총액</th>
-                  <th>비고</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="text-xs mb-2">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">재료명</TableHead>
+                  <TableHead className="text-center">단위</TableHead>
+                  <TableHead className="text-center">요청수량</TableHead>
+                  <TableHead className="text-center">입고수량</TableHead>
+                  <TableHead className="text-center">단가</TableHead>
+                  <TableHead className="text-center">총액</TableHead>
+                  <TableHead className="text-center">비고</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {orderItems.map((item) => {
                   const ing = ingredients.find(
                     (i) => i.id === item.ingredient_id
                   );
                   return (
-                    <tr key={item.id} className="border-b">
-                      <td>{ing?.name || item.ingredient_id}</td>
-                      <td>{item.unit}</td>
-                      <td>{item.requested_qty}</td>
-                      <td>{item.received_qty}</td>
-                      <td>{item.unit_price?.toLocaleString()}원</td>
-                      <td>{item.total_price?.toLocaleString()}원</td>
-                      <td>{item.note || "-"}</td>
-                    </tr>
+                    <TableRow key={item.id}>
+                      <TableCell className="text-center">
+                        {ing?.name || item.ingredient_id}
+                      </TableCell>
+                      <TableCell className="text-center">{item.unit}</TableCell>
+                      <TableCell className="text-center">
+                        {item.requested_qty}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.received_qty}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.unit_price?.toLocaleString()}원
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.total_price?.toLocaleString()}원
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.note || "-"}
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             {/* 아이템 추가 폼 */}
-            <div className="flex flex-wrap gap-2 items-end border-t pt-3 mt-2">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">재료</label>
-                <select
-                  className="border rounded px-2 py-1 text-xs"
-                  value={newItem.ingredient_id}
-                  onChange={(e) => {
-                    const id = Number(e.target.value);
-                    const ing = ingredients.find((i) => i.id === id);
-                    setNewItem((item) => ({
-                      ...item,
-                      ingredient_id: id,
-                      unit: ing?.unit || "",
-                    }));
-                  }}
-                >
-                  {ingredients.map((ing) => (
-                    <option key={ing.id} value={ing.id}>
-                      {ing.name}
-                    </option>
-                  ))}
-                </select>
+            {selectedOrder && selectedOrder.status !== "입고완료" && (
+              <div className="flex flex-row flex-wrap gap-3 items-end border-t pt-3 mt-2">
+                <div className="flex flex-col min-w-[120px]">
+                  <label className="block text-xs text-gray-500 mb-1 text-start pl-2">
+                    재료
+                  </label>
+                  <IngredientSelect
+                    ingredients={ingredients}
+                    value={newItem.ingredient_id}
+                    onChange={(id) => {
+                      const ing = ingredients.find((i) => i.id === id);
+                      setNewItem((item) => ({
+                        ...item,
+                        ingredient_id: id,
+                        unit: ing?.unit || "",
+                      }));
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col min-w-[80px]">
+                  <label className="block text-xs text-gray-500 mb-1 text-start pl-2">
+                    단위
+                  </label>
+                  <Input
+                    className="w-20 text-center h-9 text-xs px-2"
+                    value={newItem.unit}
+                    onChange={(e) =>
+                      setNewItem((item) => ({ ...item, unit: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="flex flex-col min-w-[80px]">
+                  <label className="block text-xs text-gray-500 mb-1 text-start pl-2">
+                    요청수량
+                  </label>
+                  <Input
+                    className="w-20 text-center h-9 text-xs px-2"
+                    type="number"
+                    value={newItem.requested_qty}
+                    onChange={(e) =>
+                      setNewItem((item) => ({
+                        ...item,
+                        requested_qty: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="flex flex-col min-w-[80px]">
+                  <label className="block text-xs text-gray-500 mb-1 text-start pl-2">
+                    단가
+                  </label>
+                  <Input
+                    className="w-20 text-center h-9 text-xs px-2"
+                    type="number"
+                    value={newItem.unit_price}
+                    onChange={(e) =>
+                      setNewItem((item) => ({
+                        ...item,
+                        unit_price: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="flex flex-col min-w-[120px]">
+                  <label className="block text-xs text-gray-500 mb-1 text-start pl-2">
+                    비고
+                  </label>
+                  <Input
+                    className="w-32 text-center h-9 text-xs px-2"
+                    value={newItem.note || ""}
+                    onChange={(e) =>
+                      setNewItem((item) => ({ ...item, note: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="flex flex-col justify-end">
+                  <Button
+                    className="ml-2"
+                    size="sm"
+                    onClick={async () => {
+                      if (!selectedOrder) return;
+                      await createPurchaseOrderItem({
+                        ...newItem,
+                        purchase_order_id: selectedOrder.id,
+                      });
+                      const items = await fetchPurchaseOrderItems(
+                        selectedOrder.id
+                      );
+                      setOrderItems(items);
+                      setNewItem({
+                        purchase_order_id: selectedOrder.id,
+                        ingredient_id: ingredients[0]?.id || 0,
+                        unit: ingredients[0]?.unit || "",
+                        requested_qty: 0,
+                        unit_price: 0,
+                        note: "",
+                      });
+                    }}
+                  >
+                    추가
+                  </Button>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">단위</label>
-                <Input
-                  className="w-20"
-                  value={newItem.unit}
-                  onChange={(e) =>
-                    setNewItem((item) => ({ ...item, unit: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  요청수량
-                </label>
-                <Input
-                  className="w-20"
-                  type="number"
-                  value={newItem.requested_qty}
-                  onChange={(e) =>
-                    setNewItem((item) => ({
-                      ...item,
-                      requested_qty: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">단가</label>
-                <Input
-                  className="w-20"
-                  type="number"
-                  value={newItem.unit_price}
-                  onChange={(e) =>
-                    setNewItem((item) => ({
-                      ...item,
-                      unit_price: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">비고</label>
-                <Input
-                  className="w-32"
-                  value={newItem.note || ""}
-                  onChange={(e) =>
-                    setNewItem((item) => ({ ...item, note: e.target.value }))
-                  }
-                />
-              </div>
-              <Button
-                className="ml-2"
-                size="sm"
-                onClick={async () => {
-                  if (!selectedOrder) return;
-                  await createPurchaseOrderItem({
-                    ...newItem,
-                    purchase_order_id: selectedOrder.id,
-                  });
-                  const items = await fetchPurchaseOrderItems(selectedOrder.id);
-                  setOrderItems(items);
-                  setNewItem({
-                    purchase_order_id: selectedOrder.id,
-                    ingredient_id: ingredients[0]?.id || 0,
-                    unit: ingredients[0]?.unit || "",
-                    requested_qty: 0,
-                    unit_price: 0,
-                    note: "",
-                  });
-                }}
-              >
-                추가
-              </Button>
-            </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setItemDialogOpen(false)}>
@@ -343,4 +486,6 @@ export default function PurchagePage() {
       </Dialog>
     </div>
   );
-}
+};
+
+export default PurchagePage;

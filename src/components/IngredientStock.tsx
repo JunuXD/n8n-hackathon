@@ -2,6 +2,8 @@ import { supabase } from "@/lib/apis/supabaseClient";
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import StockLogChart from "./StockLogChart";
+import { Button } from "@/components/ui/button";
 
 interface Ingredient {
   id: number;
@@ -11,9 +13,10 @@ interface Ingredient {
   unit: string;
 }
 
-export default function IngredientStock() {
+const IngredientStock: React.FC = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openChart, setOpenChart] = useState<number | null>(null);
 
   useEffect(() => {
     supabase
@@ -100,7 +103,10 @@ export default function IngredientStock() {
             barColor = "bg-amber-200";
           }
           return (
-            <div key={item.id} className="rounded-lg border p-3 bg-gray-50">
+            <div
+              key={item.id}
+              className="rounded-lg border p-3 bg-gray-50 mb-2"
+            >
               <div className="flex items-center justify-between mb-1">
                 <div className="font-medium text-gray-800 flex-1">
                   {item.name}
@@ -109,6 +115,16 @@ export default function IngredientStock() {
                   {item.current_stock} {item.unit} / 재고 알림선{" "}
                   {item.min_stock_level} {item.unit}
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-2 px-2 py-0 text-xs h-7"
+                  onClick={() =>
+                    setOpenChart(openChart === item.id ? null : item.id)
+                  }
+                >
+                  {openChart === item.id ? "닫기" : "재고 변화 그래프"}
+                </Button>
               </div>
               <div className="relative w-full">
                 <div className="w-full h-4 rounded-full bg-gray-200" />
@@ -138,10 +154,15 @@ export default function IngredientStock() {
                   재고 알림선 {item.min_stock_level} {item.unit}
                 </span>
               </div>
+              {openChart === item.id && (
+                <StockLogChart ingredientId={item.id} />
+              )}
             </div>
           );
         })}
       </div>
     </Card>
   );
-}
+};
+
+export default IngredientStock;

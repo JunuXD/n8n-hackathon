@@ -1,73 +1,184 @@
-# Welcome to your Lovable project
+# 🥐 빵가게를 위한 **빵터짐**
 
-## Project info
+n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  빵집 운영의 번거로운 재고·발주 관리를 자동화하여,  효율적이고 체계적인 운영을 지원하는 서비스입니다.
 
-**URL**: https://lovable.dev/projects/1252ac0a-b508-401e-a79a-5fa7925cb2ca
+---
 
-## How can I edit this code?
+## 📌 서비스 소개 & 문제 정의
 
-There are several ways of editing your application.
+빵집 운영에서 흔히 발생하는 문제:
 
-**Use Lovable**
+- 메뉴/레시피 정보 관리가 수작업으로 이루어져 **업데이트 누락** 발생  
+- 생산량과 판매량 연동이 어려워 **재고 부족 또는 과잉** 발생  
+- 발주 시점을 놓쳐 **품절** 또는 불필요한 발주 발생  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1252ac0a-b508-401e-a79a-5fa7925cb2ca) and start prompting.
+**빵터짐은 이러한 문제를 해결하고자 개발되었습니다.**
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 💡 문제 해결 방법
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- OCR 기반 메뉴·레시피 자동 인식 → 수작업 최소화  
+- 실시간 생산·판매 연동 재고 관리 → 정확한 재고 파악  
+- 자동 품절·발주 알림 → 적시 발주 지원  
+- 데이터 모델 기반 통합 관리 → 메뉴·레시피·재고·발주 전 주기 관리  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🚀 주요 기능
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### ✔ OCR 기반 메뉴·레시피 자동 등록
+- Upstage OCR API로 메뉴·레시피 문서/사진 자동 인식  
+- 인식 데이터 정제 후 Supabase DB 자동 Insert  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### ✔ 실시간 생산·판매 연동 재고 관리
+- 생산 계획/판매 실적 실시간 반영  
+- 레시피 기반 원재료 소진량 자동 계산  
+- 품절 임계치 알림 및 발주 추천  
 
-# Step 3: Install the necessary dependencies.
-npm i
+### ✔ 자동 품절·발주 알림
+- 이메일 알림 전송  
+- 발주 수량 자동 산출 및 n8n 워크플로우 트리거  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### ✔ 데이터 모델 기반 통합 관리 엔진
+- 메뉴–레시피–원재료–재고–발주 간 구조화된 데이터 모델  
+- n8n 기반 유연한 자동화 워크플로우 구현  
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔄 주요 워크플로우 (n8n)
 
-**Use GitHub Codespaces**
+### 1. 메뉴 자동 등록 워크플로우
+1. 이미지/문서 업로드
+2. Upstage OCR API 호출
+3. 텍스트 추출 및 정제 (메뉴명, 가격 등)
+4. Supabase DB Insert/Update
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 2. 레시피 자동 등록 워크플로우
+1. 이미지/문서 업로드
+2. Upstage Document Parser API 호출
+3. 텍스트 추출 및 정제 (메뉴명, 레시피, 원재료 등)
+4. Supabase DB Insert (메뉴 테이블)
+5. 원재료 자동 생성 및 DB Insert
+6. 메뉴-원재료 관계 테이블 생성 및 매핑
 
-## What technologies are used for this project?
+### 3. 재고·발주 관리 워크플로우
+1. 생산·판매 데이터 수집
+2. 재고 상태 계산
+3. 임계치 도달 시 알림 전송
+4. 발주 필요 수량 산출 및 자동 발주 트리거
 
-This project is built with:
+### 4. 주문 내역 실시간 반영 워크플로우
+1. DB 업데이트 및 재고 연동
+2. 알림/대시보드 실시간 갱신
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 🏆 수상 내역
+- 본 프로젝트는 **최종 심사에서 장려상 수상**  
 
-Simply open [Lovable](https://lovable.dev/projects/1252ac0a-b508-401e-a79a-5fa7925cb2ca) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 팀원 역할 요약
 
-Yes, you can!
+| 역할 | 담당 내용 |
+|------|-----------|
+| 데이터베이스 설계 | 메뉴/레시피/원재료/재고/발주 ERD 설계, Supabase 스키마 구성 |
+| n8n 워크플로우 | OCR 기반 메뉴·레시피 자동 등록, 재고·발주 알림, Webhook 연동 |
+| 프론트엔드 | 주문/메뉴/발주 UI 개발, Supabase CRUD 연동, 실시간 재고 반영 |
+| 기획/관리 | 서비스 구조 설계, 기능 정의, 프로젝트 일정 관리 |
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🏗 기술 스택
+
+- **Frontend:** React, TailwindCSS, React Query  
+- **Backend / Automation:** n8n, Upstage OCR API, Supabase Edge Functions  
+- **Infra / Tools:** Supabase, GitHub Actions, Vercel/Netlify  
+
+---
+
+## 프로젝트 데모
+
+### 메인 대시보드
+
+- **영업 상태 관리:** 영업중 / 영업 종료 상태 표시  
+- **매출 현황:** 오늘의 매출, 총 매출, 총 수량  
+- **빠른 이동:** 주문 내역 관리, 메뉴 관리, 재료 관리, 발주 관리 페이지로 바로 이동 가능  
+
+![image.png](attachment:89813e96-c0bf-4ca9-bb2e-bf426a08d41a:image.png)
+
+---
+
+### 주문 내역 관리
+
+- 전체 주문 내역 확인  
+- 주문 상태, 수량, 결제 내역 등 관리
+
+![image.png](attachment:82d3d849-cd9b-4f55-89ab-b8e7e9ef7c62:image.png)
+
+---
+
+### 메뉴 관리
+
+- **품절 임박 메뉴 확인**  
+- **빵 만들기 버튼:**  
+  - 미리 지정된 개수로 메뉴 업데이트  
+  - 재고 임계치 미만 시 자동 알림  
+- **메뉴 등록:** OCR을 통한 직접 추가 가능  
+- **레시피 등록:** OCR 기반 레시피 등록  
+  - 등록 후 메뉴 상세 페이지에서 **재료 세부 내역 확인 가능**  
+
+![image.png](attachment:15cfff40-b591-437b-87e5-251c647660ff:image.png)
+
+
+- **메뉴 상세 페이지**
+
+![image.png](attachment:667677e4-40cf-4384-abdd-7ca947e87ae3:image.png)
+
+---
+
+### 재고 관리
+
+- **재고 상태 표시 바:**  
+  - 충분: 파란색  
+  - 임박: 노란색  
+  - 부족: 빨간색  
+- 재고 수량 및 임계치 실시간 반영  
+
+![image.png](attachment:97b82426-93c5-4a78-bda6-04c99948a163:image.png)
+
+---
+
+### 발주 관리
+
+- 발주 현황 확인  
+- 발주 완료 시 해당 재료 **자동 재고 업데이트**  
+- 자동 발주 알림 및 수량 산출 기능 포함  
+
+![image.png](attachment:03e3605b-0afb-401c-8a14-2e541ae9da52:image.png)
+
+---
+
+## 손님용 페이지
+
+![image.png](attachment:dc31247a-eaba-4f55-9fb3-4bc022806f0f:image.png)
+
+### 챗봇
+
+- 영업 시간 안내  
+- 재고 현황 조회  
+- 인기 메뉴 추천  
+
+![image.png](attachment:31a77406-8dcc-454f-be72-2e1eadc0e8ec:image.png)
+
+### 주문하기
+
+- 재고 있는 메뉴 바로 주문 가능  
+- 주문 시 재고 자동 반영
+
+![image.png](attachment:20d39c15-54fd-467f-a77b-a7ff64378aee:ec635cc0-9a65-4456-b6a1-d1d164f73935.png)
+
+![image.png](attachment:56bd7742-1196-4c8f-9cb1-6bf186f22dab:image.png)
+
+

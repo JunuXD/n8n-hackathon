@@ -106,7 +106,8 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
 - **매출 현황:** 오늘의 매출, 총 매출, 총 수량  
 - **빠른 이동:** 주문 내역 관리, 메뉴 관리, 재료 관리, 발주 관리 페이지로 바로 이동 가능  
 
-![image.png](attachment:89813e96-c0bf-4ca9-bb2e-bf426a08d41a:image.png)
+<img width="2754" height="1468" alt="image" src="https://github.com/user-attachments/assets/6b69b376-39fa-4825-b0d9-06cc4e2dab57" />
+
 
 ---
 
@@ -115,7 +116,8 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
 - 전체 주문 내역 확인  
 - 주문 상태, 수량, 결제 내역 등 관리
 
-![image.png](attachment:82d3d849-cd9b-4f55-89ab-b8e7e9ef7c62:image.png)
+<img width="2000" height="1105" alt="image" src="https://github.com/user-attachments/assets/b9709455-fe0b-404b-ac86-11f55a12f173" />
+
 
 ---
 
@@ -129,12 +131,14 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
 - **레시피 등록:** OCR 기반 레시피 등록  
   - 등록 후 메뉴 상세 페이지에서 **재료 세부 내역 확인 가능**  
 
-![image.png](attachment:15cfff40-b591-437b-87e5-251c647660ff:image.png)
+<img width="2000" height="1919" alt="image" src="https://github.com/user-attachments/assets/dc051348-7217-406f-aea7-cb26ffd32bea" />
+
 
 
 - **메뉴 상세 페이지**
 
-![image.png](attachment:667677e4-40cf-4384-abdd-7ca947e87ae3:image.png)
+<img width="2388" height="2124" alt="image" src="https://github.com/user-attachments/assets/7edc0e2f-06cb-49b4-83bf-d32e22fd1f49" />
+
 
 ---
 
@@ -146,7 +150,8 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
   - 부족: 빨간색  
 - 재고 수량 및 임계치 실시간 반영  
 
-![image.png](attachment:97b82426-93c5-4a78-bda6-04c99948a163:image.png)
+<img width="2734" height="1458" alt="image" src="https://github.com/user-attachments/assets/3d243604-1dbf-41aa-a11d-209356e054d6" />
+
 
 ---
 
@@ -156,13 +161,15 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
 - 발주 완료 시 해당 재료 **자동 재고 업데이트**  
 - 자동 발주 알림 및 수량 산출 기능 포함  
 
-![image.png](attachment:03e3605b-0afb-401c-8a14-2e541ae9da52:image.png)
+<img width="2734" height="1458" alt="image" src="https://github.com/user-attachments/assets/21fa27b0-7ff6-4502-9567-8ac1c43579ab" />
+
 
 ---
 
 ## 손님용 페이지
 
-![image.png](attachment:dc31247a-eaba-4f55-9fb3-4bc022806f0f:image.png)
+<img width="2754" height="1468" alt="image" src="https://github.com/user-attachments/assets/ab93f1a8-2bfd-41d4-84ad-fed80c72087f" />
+
 
 ### 챗봇
 
@@ -170,15 +177,18 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**으로  
 - 재고 현황 조회  
 - 인기 메뉴 추천  
 
-![image.png](attachment:31a77406-8dcc-454f-be72-2e1eadc0e8ec:image.png)
+<img width="2754" height="1468" alt="image" src="https://github.com/user-attachments/assets/dc41fa50-261a-4e89-bed1-47d7926d7e43" />
+
 
 ### 주문하기
 
 - 재고 있는 메뉴 바로 주문 가능  
 - 주문 시 재고 자동 반영
 
-![image.png](attachment:20d39c15-54fd-467f-a77b-a7ff64378aee:ec635cc0-9a65-4456-b6a1-d1d164f73935.png)
+<img width="2000" height="1133" alt="image" src="https://github.com/user-attachments/assets/cf69d768-3f4c-46b1-83ea-7dde7b755b13" />
 
-![image.png](attachment:56bd7742-1196-4c8f-9cb1-6bf186f22dab:image.png)
+
+<img width="2734" height="1458" alt="image" src="https://github.com/user-attachments/assets/57252bd2-a369-4460-9e16-99666a4f4735" />
+
 
 

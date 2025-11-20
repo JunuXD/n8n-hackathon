@@ -54,6 +54,13 @@ n8n 워크플로우 기반 **스마트 재고·발주 관리 시스템**입니�
 
 
 ## 🔄 주요 워크플로우 (n8n)
+<img width="1235" height="566" alt="image" src="https://github.com/user-attachments/assets/8158eddb-cd49-4a15-8170-96dce98cf7bd" />
+<img width="300"  alt="image" src="https://github.com/user-attachments/assets/39a57d96-208c-4049-b4f2-9796afb080a9" />
+<img width="1798" height="430" alt="image" src="https://github.com/user-attachments/assets/45c06986-f840-45d6-9890-9efc9e6990a6" />
+<img width="1141" height="276" alt="image" src="https://github.com/user-attachments/assets/45a169da-cacb-4165-b04d-7d263afaddf0" />
+<img width="1851" height="342" alt="image" src="https://github.com/user-attachments/assets/dfd8cc5a-b2f8-49f6-b4d9-c36e8abc5e9b" />
+<img width="1824" height="321" alt="image" src="https://github.com/user-attachments/assets/27a5e990-20c6-4882-85db-e11fa78b4566" />
+
 
 ### 1. 메뉴 자동 등록 워크플로우
 1. 이미지/문서 업로드
